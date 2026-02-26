@@ -198,9 +198,7 @@ This is important becasue:
 - Proper data types (e.g., `date`) are important for ordering, window functions, and time‑based joins/aggregations.
 - Filtering to a small, focused subset is a common step to accelerate iteration in development.
 
----
-
-### 1) Download & Load the CSV
+### 1. Download & Load the CSV
 
 The cell below downloads the latest CSV into `/content` (Colab’s working directory) if it’s not already present, and loads it with `inferSchema=True` so Spark can detect numeric types.  
 We then cast the `date` string into a proper Spark `date` type so that time operations will work as expected.
@@ -271,8 +269,6 @@ print("new_cases:", dtypes.get("new_cases"))
 - `location` should be a string type
 - `date` should be a date type (after casting)
 - `new_cases` should be a numeric type (often `DoubleType`)
-
----
 
 ### Task 3 — Show the Latest Records for Canada
 
