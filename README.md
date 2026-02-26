@@ -393,8 +393,6 @@ You will:
 
  **Context:** In production, “filling with zero” is not universally correct. We do it here for instructional simplicity and to stabilize downstream calculations. Always choose imputation strategies that match your data semantics.
 
----
-
 ### 1. Inspect Missingness
 
 Use boolean expressions cast to integers to **count** nulls in key columns. This pattern is scalable and fast in Spark.
@@ -413,7 +411,6 @@ df_joined.select(
 - `population` should generally be present for the five countries we added; any nulls indicate a join mismatch.
 - `new_cases` / `new_deaths` may have nulls due to reporting gaps.
 
----
 
 ### 2. Keep a Copy of the Pre‑Clean State
 
@@ -425,7 +422,6 @@ before_count = df_before_clean.count()
 print("Rows BEFORE cleaning:", before_count)
 ```
 
----
 
 ### 3. Perform Cleaning Steps 
 
@@ -451,7 +447,6 @@ df_clean.select("location", "date", "new_cases", "new_deaths", "population").ord
 - We intentionally **scope** `fillna` to specific columns to avoid masking other nulls (e.g., demographics).
 - `dropDuplicates` without a subset would de‑dup on the entire row; providing the subset focuses on the time‑series key.
 
----
 
 ### Task 4 — Compare Row Counts (Before vs After)
 
@@ -469,7 +464,6 @@ Print the row counts **before** and **after** cleaning. Verify that:
 # Your code here
 ```
 
----
 
 ### Solution: Compare Row Counts
 
@@ -487,7 +481,6 @@ print("Rows removed by cleaning:", before_count - after_count)
   - Null `population` (dropped in step 3.1), and/or
   - Duplicate (`location`, `date`) rows (removed in step 3.3)
 
----
 
 ### 4. Sanity Check: Are There Any Remaining Nulls? (Run)
 
@@ -505,7 +498,6 @@ df_clean.select(
 - `remaining_null_population` should be `0` (we dropped them).
 - `remaining_null_new_cases` / `remaining_null_new_deaths` should be `0` if your fill worked.
 
----
 
 ### 5) (Optional) Guard the Per‑Capita Metric (Run)
 
@@ -522,14 +514,12 @@ df_clean.select("location", "date", "new_cases", "population", "cases_per_millio
         .show(10, truncate=False)
 ```
 
----
 
 ### Reflection Questions (Write short answers beneath your screenshots)
 1. Why is **dropping duplicates** by (`location`, `date`) important in time‑series pipelines?  
 2. When is it **not** appropriate to fill missing values with zero? Give one example.  
 3. Why must rows with missing `population` be removed (or fixed) before computing per‑capita metrics?
 
----
 
 ### Screenshot Requirements for Section 5
 Include clear, readable screenshots of:
