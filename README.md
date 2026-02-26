@@ -193,7 +193,7 @@ df_pop.show()
 In this section, you will **download and load** the Our World in Data (OWID) COVID‑19 dataset into a Spark DataFrame and prepare it for joining by ensuring the `date` column has the proper Spark `date` type.  
 We will then **filter to five focus countries** so downstream tasks are fast and easy to inspect in Colab.
 
-**Why this matters:**
+This is important becasue:
 - Large “fact” datasets like daily COVID records are common in analytics.
 - Proper data types (e.g., `date`) are important for ordering, window functions, and time‑based joins/aggregations.
 - Filtering to a small, focused subset is a common step to accelerate iteration in development.
