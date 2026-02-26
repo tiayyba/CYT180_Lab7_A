@@ -336,20 +336,14 @@ df_joined.orderBy("date").show(10, truncate=False)
 
 ### Task 4 — Compute `cases_per_million`
 
-In the datafrmae `df_joined`, create a new numeric column called `cases_per_million` using this formula:
-
+- In the datafrmae `df_joined`, create a new numeric column called `cases_per_million` using this formula:
 ```
 cases_per_million = new_cases * 1,000,000 / population
 ```
-
-This metric allows you to compare countries fairly despite differences in population size.
-
-**Requirements:**
-- Use `withColumn` to create `cases_per_million`.
-- Use the **population from the metadata table** (i.e., the joined population from `df_pop`, not the OWID one).
-- Store the result in a column named `cases_per_million`.
-- **After creating this column, preview the results**:
-  - Filter to `cases_per_million > 0` and `cases_per_million IS NOT NULL`. **Important:** If you simply sort by `date` and show the first 10 rows, you may see many zeros (early dates often have `new_cases = 0`). After creating this column, **preview the results** by filtering to show only rows where `cases_per_million` is **non‑null and greater than 0**.
+- This metric allows you to compare countries fairly despite differences in population size.
+- You can use the function`withColumn` to create `cases_per_million`.
+- After creating this column, **preview the results**:
+  - Filter to `cases_per_million > 0` and `cases_per_million IS NOT NULL`. **Important:** If you simply sort by `date` and show the first 10 rows, you may see many zeros (early dates often have `new_cases = 0`). 
   - Display at least:
     - `location`
     - `date`
