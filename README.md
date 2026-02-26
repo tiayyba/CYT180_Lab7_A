@@ -93,6 +93,7 @@ An **inner join** returns only the rows where the join key exists *in both* Data
 - If it appears in only one → it is excluded
 
 Think of it as: **"Show me only matching rows."**
+
 In PySpark, you specify the join condition using the `on=` parameter in `DataFrame.join()`.
 
 The following query will show only the people who have a matching salary record. It excludes anyone without a salary and excludes any salary entries that don’t have a matching person.
