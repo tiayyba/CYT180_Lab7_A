@@ -299,11 +299,7 @@ Order by `date` **descending** so the most recent records appear first.
 ## Section 4 — Join COVID Data with Population Data
 
 In this section, you will learn how to **join a large fact dataset** (daily COVID case counts) with a **small dimension table** (population + continent metadata).  
-This is one of the most common operations in data engineering and analytics.
-
-We will join the two DataFrames using the column `location`.  
-Both tables contain this field, so Spark can match rows correctly.
-
+This is one of the most common operations in data engineering and analytics. We will join the two DataFrames using the column `location`. Both tables contain this field, so Spark can match rows correctly.
 The purpose of this join is to enrich the COVID dataset with population information so we can compute **per-capita metrics** such as `cases_per_million`.
 
 ### Left Join on `location`
