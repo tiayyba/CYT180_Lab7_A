@@ -349,6 +349,7 @@ cases_per_million = new_cases * 1,000,000 / population
     - `location`
     - `date`
     - `new_cases`
+    - `new_deaths`
     - `population`
     - `cases_per_million`
   - You may **either**:
