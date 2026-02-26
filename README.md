@@ -341,9 +341,9 @@ In the datafrmae `df_joined`, create a new numeric column called `cases_per_mill
 ```
 cases_per_million = new_cases * 1,000,000 / population
 ```
-This metric allows you to compare countries fairly despite differences in population size.
-- You can use the function`withColumn` to create `cases_per_million`.
-- After creating this column, **preview the results**:
+This metric allows you to compare countries fairly despite differences in population size. You can use the function`withColumn` to create `cases_per_million`.
+
+After creating this column, **preview the results**:
 - Filter to `cases_per_million > 0` and `cases_per_million IS NOT NULL`. **Important:** If you simply sort by `date` and show the first 10 rows, you may see many zeros (early dates often have `new_cases = 0`). 
 - You may **either**:
     - order by `date` (to see earliest non‑zero values), **or**
