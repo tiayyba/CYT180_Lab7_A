@@ -42,11 +42,56 @@ By the end of this lab, you will be able to:
 
 > Tip: If Spark is not yet initialized in your Colab, run the same install steps from Lab 6 (Java 11, Spark 3.5.x, findspark) and then create the `SparkSession`.
 
----
+----
 
 ## Section 1 — Simple DataFrames & Basic Joins
 
-In this section, you will run code that creates two small tables and performs different types of joins to illustrate the mechanics before applying them to real data.
+In this section, you will create two small DataFrames and learn how Spark performs different types of joins.  
+Joins are one of the most important operations in data engineering because real-world datasets are almost never stored in a single table.
+
+We will use two tables:
+
+- `df_people` – information about individuals  
+- `df_salary` – salary records keyed by `person_id`
+
+You will run the provided code, observe the outputs, and complete one small task.
+
+### What is an **Inner Join**?
+
+An **inner join** returns only the rows where the join key exists *in both* DataFrames.
+
+- If a `person_id` appears in both tables → it is included  
+- If it appears in only one → it is excluded
+
+Think of it as: **"Show me only matching rows."**
+
+###  What is a **Left Join**?
+
+A **left join** keeps *all* rows from the left DataFrame (`df_people`), and adds matching data from the right DataFrame (`df_salary`) when available.
+
+- If the left row has no match → Spark fills missing values with `null`
+- Nothing is removed from the left table
+
+Think of it as:  
+**"Keep everyone in the people table; add salary data if available."**
+
+###  What is an **Anti Join**?
+
+An **anti join** returns rows from one DataFrame where **no match exists** in the other.
+
+Specifically:
+
+- A **right anti join** shows rows in the right table (`df_salary`)  
+  that *do not* have a matching `person_id` in the left table (`df_people`)
+
+This is extremely useful for:
+
+- finding data quality issues  
+- detecting orphan records  
+- identifying missing relationships  
+
+Think of it as:  
+**"Show me the records that failed to match."**
 
 ### 1. Create Sample Data (Run)
 
@@ -74,25 +119,24 @@ df_salary = spark.createDataFrame(salaries, ["person_id","salary"])
 
 df_people.show()
 df_salary.show()
-
 ```
-### 1. Inner Join 
+
+### 2. Inner Join 
 
 ```python
 df_inner = df_people.join(df_salary, on="person_id", how="inner")
 df_inner.show()
 ```
 
-### 1. Left Join 
+### 3. Left Join 
 
 ```python
 df_left = df_people.join(df_salary, on="person_id", how="left")
 df_left.show()
 ```
 
-### Student Task 1 — Anti Join (Write + Run)
+### Student Task 1 — Anti Join
 Perform a right anti join on df_salary to find rows in the salary table that do not have a matching person in df_people.
-
 Expected output includes person_id = 5.
 
 
