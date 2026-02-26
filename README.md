@@ -36,9 +36,8 @@ By the end of this lab, you will be able to:
 
 ##  Prerequisites
 
-- You have **Google Colab** access.
-- You can initialize a **SparkSession** (from Lab 6).
-- You can run cells and take **clear screenshots**.
+- You will work in **Google Colab**.
+- You should be able to initialize a **SparkSession** (from Lab 6).
 
 **Tip**: If Spark is not yet initialized in your Colab, run the same install steps from Lab 6 (Java 11, Spark 3.5.x, findspark) and then create the `SparkSession`.
 
