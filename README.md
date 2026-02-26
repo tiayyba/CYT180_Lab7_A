@@ -119,7 +119,7 @@ A **left join** keeps *all* rows from the left DataFrame (`df_people`), and adds
 
 Think of it as:  **"Keep everyone in the people table; add salary data if available."**
 
-Let's write a query to: *"List everyone from the people table, and include salary if available. If a person has no salary record, show null for salary."*
+Let's write a query to: "List everyone from the people table, and include salary if available. If a person has no salary record, show null for salary."
 
 ```python
 df_left = df_people.join(df_salary, on="person_id", how="left")
