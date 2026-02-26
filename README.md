@@ -304,13 +304,27 @@ The purpose of this join is to enrich the COVID dataset with population informat
 ### Left Join on `location`
 
 We perform a **left join** because we want to keep all rows from the COVID dataset, even if a country is missing from the population table (rare, but safe).
+We use DataFrame aliases and qualified columns to avoid ambiguous references (both datasets have a `location` and `population` column).
 
-```python
-df_joined = df_covid.join(df_pop, on="location", how="left")
+```
+from pyspark.sql import functions as F
 
-df_joined.select("location", "date", "new_cases", "population", "continent") \
-         .orderBy("location", "date") \
-         .show(10, truncate=False)
+c = df_covid.alias("c") # df_covid (has location, date, new_cases, population, ...)
+p = df_pop.alias("p") # df_pop (has location, population, continent)
+
+df_joined = (
+    c.join(p, on=F.col("c.location") == F.col("p.location"), how="left")
+)
+
+df_joined = df_joined.select(
+    F.col("c.location").alias("location"),
+    F.col("c.date").alias("date"),
+    F.col("c.new_cases").alias("new_cases"),
+    F.col("p.population").alias("population"),    
+    F.col("p.continent").alias("continent")
+)
+
+df_joined.orderBy("date").show(10, truncate=False)
 ```
 
 **What this join does:**
