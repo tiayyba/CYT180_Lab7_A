@@ -170,8 +170,6 @@ Think of it as:  **"Show me the records that failed to match."**
 ### Task 1 — Anti Join
 Perform a right anti join on df_salary to find rows in the salary table that do not have a matching person in `df_people`.
 Expected output includes `person_id = 5`.
-
-
 Add your code below and include a screenshot of the result.
 
 ```python
@@ -180,6 +178,12 @@ Add your code below and include a screenshot of the result.
 ```
 ### Reflection Questions
 - In 2-4 sentences, explain why `person_id = 5` appears in the anti join result.
+
+### Screenshots to capture for this section
+- Inner join output
+- Left join output
+- **Task 1:** Right anti join code + output (must show `person_id = 5`)
+- Answer to the reflection question
 
 ----
 
