@@ -361,10 +361,9 @@ cases_per_million = new_cases * 1,000,000 / population
 # Your code here
 ```
 
-
-### Reflection Question 2
-
-Explain in 1–2 sentences why **per‑capita** metrics (per million people) are more meaningful than raw `new_cases` counts when comparing countries.
+### Screenshots to capture for Section 4
+  - Joined table preview with `population` and `continent` 
+  - Task 4: `cases_per_million` code + preview including `cases_per_million` 
 
 ----
 
