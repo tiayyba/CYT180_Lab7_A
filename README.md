@@ -44,10 +44,6 @@ By the end of this lab, you will be able to:
 
 ---
 
-# 🧪 LAB 7 — Spark Joins, Cleaning, and Writing Data
-
----
-
 ## Section 1 — Simple DataFrames & Basic Joins
 
 In this section, you will run code that creates two small tables and performs different types of joins to illustrate the mechanics before applying them to real data.
