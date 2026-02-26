@@ -612,8 +612,6 @@ This mirrors a standard step in data engineering pipelines where results are wri
 - **Parquet** is a **columnar**, **compressed**, and **schema-aware** format optimized for analytics and Spark.
 - Understanding when and why to prefer Parquet is table stakes for Big Data work.
 
----
-
 ### 1. Write Cleaned Data to CSV and Parquet
 
 We will write the `df_clean` DataFrame (created in Section 5) to two separate directories in Colab’s `/content` workspace.
@@ -630,7 +628,6 @@ df_clean.write.mode("overwrite").parquet("/content/lab7_output_parquet")
 - Spark writes **directories**, not single files, because data may be partitioned across tasks.
 - `mode("overwrite")` ensures reruns replace older outputs.
 
----
 
 ### 2. Inspect Directory Structure
 
@@ -644,11 +641,9 @@ print("\nParquet directory listing:")
 !ls -la /content/lab7_output_parquet | head -n 20
 ```
 
-**What to look for:**
+**Notes:**
 - CSV output folder will contain multiple `part-...` files (text files with CSV rows).
 - Parquet output folder will contain `part-...` **binary** files plus metadata.
-
----
 
 ### 3. Compare Sizes with `du -sh`
 
@@ -663,15 +658,12 @@ print("\nParquet size:")
 !du -sh /content/lab7_output_parquet
 ```
 
-**What to expect:**
+**Notes:**
 - Parquet is typically **smaller** due to compression and columnar encoding.
 - Your exact numbers will vary by runtime and filtered subset.
 
----
+### Task 6 — Read Back the Parquet and Confirm Schema
 
-### Task — Read Back the Parquet and Confirm Schema
-
-**Problem Statement:**  
 Read the Parquet output back into a new DataFrame and print its **schema** and a small **preview**.  
 This verifies that writing and reading Parquet preserves column types and data (including the `cases_per_million` if present in `df_clean`).
 
@@ -681,68 +673,19 @@ This verifies that writing and reading Parquet preserves column types and data (
 # Your code here
 ```
 
----
-
-###  Solution — Read Back Parquet and Confirm Schema
-
-```python
-# Read the Parquet output
-df_parquet = spark.read.parquet("/content/lab7_output_parquet")
-
-# Show schema and a small preview
-df_parquet.printSchema()
-df_parquet.orderBy("location", "date").show(10, truncate=False)
-```
-
-**Explanation:**
-- Parquet stores the schema with the data; reading it back preserves types like `DateType`, numeric types, etc.
-- The `orderBy` is just for a tidy preview and does not affect stored data.
-
----
-
-### 4. Bonus — Partitioned Writes by Country
-
-Partitioning splits the dataset by one or more columns to improve prune-ability when reading subsets (e.g., only Canada).  
-This often improves performance during reads filtered on the partition key.
-
-```python
-df_clean.write.mode("overwrite") \
-    .partitionBy("location") \
-    .parquet("/content/lab7_output_parquet_partitioned")
-
-print("Partitioned Parquet directory listing (top):")
-!ls -la /content/lab7_output_parquet_partitioned | head -n 30
-```
-
-**Try reading a single partition:**
-```python
-# Example: read only Canada's partition by using a path filter
-df_canada_only = spark.read.parquet("/content/lab7_output_parquet_partitioned/location=Canada")
-df_canada_only.show(10, truncate=False)
-```
-
----
-
 ### Reflection Questions (write your answers below your screenshots)
 
 1. Which output format had the **smaller** directory size, and **why**?  
 2. Name two reasons Parquet is preferred in analytic workloads compared to CSV.  
-3. What advantage does **partitioning** provide when querying a subset (e.g., a specific country)?  
-4. After reading the Parquet back, did the schema match your expectations (e.g., `date` type preserved)? Explain.
 
----
 
 ### Screenshot Requirements for Section 7
 
 Include clear screenshots of:
-
-1. The **write** operations to CSV and Parquet (the code cells).  
-2. The **directory listings** for both outputs.  
-3. The **`du -sh`** size comparison for CSV vs Parquet.  
-4. The **solution** that reads Parquet back and shows **schema + sample rows**.  
-5. (Optional) The **partitioned** write and directory preview.  
-
-Ensure outputs are readable and not truncated (`truncate=False` where helpful).
+- The **write** operations to CSV and Parquet (the code cells).
+- The **directory listings** for both outputs.
+- The **`du -sh`** size comparison for CSV vs Parquet.
+- Task 6 that reads Parquet back and shows **schema + sample rows**.  
 
 ---
 ## Conclusion
@@ -764,113 +707,33 @@ These steps reflect the core of a modern **ETL pipeline**:
 3. **Load** it into optimized storage formats for downstream analytics  
 
 By the end of this lab, you should feel comfortable navigating Spark across its most commonly used components—DataFrames, SQL, joins, cleaning operations, and data serialization. These skills will support you in more advanced data engineering, big‑data analytics, and cloud‑based processing workflows in future labs and real‑world projects.
+
 ---
 
 
-## Section 8 — Submission Guidelines
+## Submission Guidelines
 
 This final section defines **exactly what you must submit**, how to **prove ownership** of your work in Colab, and what **quality standards** will be used for grading. Follow it carefully to avoid deductions.
 
----
+- **Required screenshots:**
+    - Every section lists what screenshots to include. Please add them in correct order under proper headings.
+    - Make sure your final PDF report is well organized
 
-### 1. Submission Artifacts (Screenshots + Short Answers)
+- **Ownership Proof (Show Date/Time + Username in Colab)**
+    - Add a small cell at the **top of your notebook** that prints your **username** and the **current timestamp** from the runtime.
 
-Submit **clear, readable screenshots** for each required item listed below.  
-Under each screenshot, type your **short written answer(s)** to the relevant reflection prompt(s).
-
-**Required screenshots:**
-
-- **Section 1 (Joins)**
-  - Inner join output
-  - Left join output
-  - **Student Task 1:** Right anti join code + output (must show `person_id = 5`)
-
-- **Section 2 (Population Metadata)**
-  - `df_pop.show()` with all five countries and columns: `location`, `population`, `continent`
-
-- **Section 3 (COVID Load + Subset)**
-  - `df.printSchema()` after `date` casting
-  - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
-  - **Task 2.A:** Types for `location`, `date`, `new_cases`
-  - **Task 2.B:** Latest 10 records for **Canada** (ordered by date descending)
-
-- **Section 4 (Join + Metric)**
-  - Joined table preview with `population` and `continent`
-  - **Student Task:** `cases_per_million` code + preview including `cases_per_million`
-
-- **Section 5 (Cleaning)**
-  - Missingness counts (before cleaning)
-  - Row counts **before vs after** cleaning (and difference)
-  - Remaining nulls check after cleaning
-  - (Optional) Recomputed `cases_per_million` preview from `df_clean`
-
-- **Section 6 (Spark SQL)**
-  - SQL LEFT JOIN (`people` ↔ `salary`) query + output
-  - **Student Task:** Aggregation query over `covid_clean` (with `avg_new_cases`, `max_new_cases`) + output
-  - (Optional) Bonus SQL join + per‑million metric
-
-- **Section 7 (Write + Compare Formats)**
-  - Code that writes **CSV** and **Parquet**
-  - Directory listings for both outputs
-  - `du -sh` size comparison for both
-  - **Student Task:** Read‑back Parquet code + schema + preview
-  - (Optional) Partitioned write preview and (optionally) a single partition read
-
-**Reflection Answers:**  
-Write **1–2 sentence** answers under the relevant screenshots for:
-- Section 1: Anti join reasoning  
-- Section 4: Why per‑capita metrics are more meaningful  
-- Section 5: Duplicates, zero‑fill caveats, and population null handling  
-- Section 6: When SQL is preferable; group‑by reasoning; null population filter  
-- Section 7: CSV vs Parquet; benefits of Parquet; partitioning advantage
-
----
-
-### 2) Ownership Proof (Show Date/Time + Username in Colab)
-
-Add a small cell at the **top of your notebook** that prints your **username** and the **current timestamp** from the runtime.
-
-```python
-import getpass, datetime
-print("CYT180 Lab 7 Owner:", getpass.getuser())
-print("Timestamp:", datetime.datetime.now().isoformat())
-```
+    ```python
+    import getpass, datetime
+    print("CYT180 Lab 7 Owner:", getpass.getuser())
+    print("Timestamp:", datetime.datetime.now().isoformat())
+    ```
 
 Take a screenshot **showing this cell’s output** and include it with your submission.  
 If your environment returns a generic user (e.g., `root` in Colab), also type your full name/username in a Markdown cell and include that in the same screenshot.
 
----
-
-### 3) Presentation & Professionalism Requirements
-
-- **Readability:** Use `.show(10, truncate=False)` for samples so columns are not cut off.
-- **Zoom:** Ensure text is **large enough** to read in the screenshot (no tiny text).
-- **Relevance:** Keep only relevant output; avoid long walls of text/logs.
-- **Organization:** Submit in the requested order. Clearly label each section in your document.
-- **Completeness:** Missing any required screenshot or answer may incur deduction up to 100%.
-
----
-
-### 4) Late / Technical Issues
-
-If you encounter technical issues in Colab (session disconnects, storage quota, etc.):
-- Re-run the initialization cells (Spark setup from Lab 6) and retry the relevant sections.
-- If the dataset URL is temporarily unavailable, try again in a few minutes.
-- Document the issue briefly in your submission and include any partial results.
-
----
-
-
----
-
-### 6. Wrap‑Up: ETL Summary Talking Points
-
-Use these to frame your final reflection or discussion:
-
-- **Extract:** Loaded OWID COVID CSV (fact) and created a small population table (dimension).
-- **Transform:** Joined on `location`, cleaned missing/duplicate values, computed `cases_per_million`, and aggregated in SQL.
-- **Load:** Wrote outputs in **CSV** and **Parquet**, validated Parquet read‑back, and compared storage sizes.
-
-This is the core of a **mini data engineering pipeline** in Spark, all runnable in Google Colab.
-
----
+- **Presentation & Professionalism Requirements**
+    - **Readability:** Use `.show(10, truncate=False)` for samples so columns are not cut off.
+    - **Zoom:** Ensure text is **large enough** to read in the screenshot (no tiny text).
+    - **Relevance:** Keep only relevant output; avoid long walls of text/logs.
+    - **Organization:** Submit in the requested order. Clearly label each section in your document.
+    - **Completeness:** Missing any required screenshot or answer may incur deduction up to 100%.
