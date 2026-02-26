@@ -228,10 +228,6 @@ print("Row count (may take a few seconds):", df.count())
 df.printSchema()
 ```
 
-**What to look for:**
-- `date` should appear as `DateType` in the schema after casting.
-- The row count confirms successful load (it can take a few seconds).
-
 ### 2. Filter to a Focus Subset
 
 We will keep the same five countries used elsewhere in the lab to keep outputs readable and consistent.
@@ -246,15 +242,14 @@ df_covid.select("location", "date", "new_cases", "new_deaths") \
         .show(10, truncate=False)
 ```
 
-**What this does:**
+**Code Explanation:**
 - Uses `.isin(...)` to filter rows for our five countries.
 - Selects a minimal set of columns to preview.
 - Orders by `location, date` to make the output human-friendly.
 
 
-### Student Task 2.A — Verify Data Types (Write + Run)
+### Task 2 — Verify Data Types 
 
-**Problem statement:**  
 Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
 
 **Hint:** You can call `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns.
@@ -272,16 +267,15 @@ print("date:", dtypes.get("date"))
 print("new_cases:", dtypes.get("new_cases"))
 ```
 
-**Expected discussion point:**
+**Expected Output:**
 - `location` should be a string type
 - `date` should be a date type (after casting)
 - `new_cases` should be a numeric type (often `DoubleType`)
 
 ---
 
-### Student Task 2.B — Show the Latest Records for Canada (Write + Run)
+### Task 3 — Show the Latest Records for Canada
 
-**Problem statement:**  
 Display the **latest 10 records** for **Canada**, showing the columns:
 - `location`
 - `date`
@@ -302,21 +296,10 @@ Order by `date` **descending** so the most recent records appear first.
 
 ```
 
-**What to look for:**
+**Expected Output**
 - Only Canada rows  
 - Dates in descending order  
 - Exactly the four specified columns  
-
----
-
-### Screenshots to capture for this section
-
-1. The `df.printSchema()` output showing `date` is a `DateType`.  
-2. A preview of `df_covid` after filtering (the 10-row sample is fine).  
-3. Your Task 2.A code cell and its output (types).  
-4. Your Task 2.B code cell and its output (latest 10 records for Canada).  
-
-Make sure the text is readable and columns/rows are not truncated (use `truncate=False` where helpful).
 
 ----
 
@@ -330,9 +313,7 @@ Both tables contain this field, so Spark can match rows correctly.
 
 The purpose of this join is to enrich the COVID dataset with population information so we can compute **per-capita metrics** such as `cases_per_million`.
 
----
-
-### 1) Left Join on `location` (Run)
+### Left Join on `location`
 
 We perform a **left join** because we want to keep all rows from the COVID dataset, even if a country is missing from the population table (rare, but safe).
 
@@ -353,7 +334,7 @@ df_joined.select("location", "date", "new_cases", "population", "continent") \
 
 ---
 
-### 2)  Student Task — Compute `cases_per_million`
+### Task 4 — Compute `cases_per_million`
 
 **Problem statement:**  
 Create a new numeric column called `cases_per_million` using this formula:
@@ -373,8 +354,6 @@ This metric allows you to compare countries fairly despite differences in popula
   - `new_cases`
   - `population`
   - `cases_per_million`
-
-**Starter code:**
 
 ```python
 # TODO: Add cases_per_million column
@@ -402,23 +381,9 @@ df_joined = df_joined.withColumn(
 - Using `F.lit(1_000_000)` ensures Spark treats the constant as a numeric literal.
 - Null `population` values will produce null `cases_per_million` until cleaned in the next section.
 
----
-
-### Reflection Question 3
+### Reflection Question 2
 
 Explain in 1–2 sentences why **per‑capita** metrics (per million people) are more meaningful than raw `new_cases` counts when comparing countries.
-
----
-
-### Screenshot Requirements for Section 4
-
-Your screenshots must include:
-
-1. The joined DataFrame showing population and continent fields  
-2. Your working code for the `cases_per_million` column  
-3. A preview of the DataFrame showing this new column  
-
-Make sure all screenshots are readable and properly zoomed.
 
 ----
 
@@ -436,7 +401,7 @@ You will:
 
 ---
 
-### 1) Inspect Missingness
+### 1. Inspect Missingness
 
 Use boolean expressions cast to integers to **count** nulls in key columns. This pattern is scalable and fast in Spark.
 
@@ -456,7 +421,7 @@ df_joined.select(
 
 ---
 
-### 2) Keep a Copy of the Pre‑Clean State
+### 2. Keep a Copy of the Pre‑Clean State
 
 We will use this to compare row counts **before vs after** cleaning.
 
@@ -468,7 +433,7 @@ print("Rows BEFORE cleaning:", before_count)
 
 ---
 
-### 3) Perform Cleaning Steps (Run)
+### 3. Perform Cleaning Steps 
 
 - **Drop** rows missing `population` (we cannot compute per‑capita metrics without it).
 - **Fill** selected numeric columns (`new_cases`, `new_deaths`) with `0` for this exercise.
@@ -494,9 +459,8 @@ df_clean.select("location", "date", "new_cases", "new_deaths", "population").ord
 
 ---
 
-### 📝 Student Task — Compare Row Counts (Before vs After)
+### Task 4 — Compare Row Counts (Before vs After)
 
-**Problem statement:**  
 Print the row counts **before** and **after** cleaning. Verify that:
 - The **after** count is **less than or equal to** the **before** count
 - Differences are explainable by dropped `population` nulls and duplicate rows
@@ -513,7 +477,7 @@ Print the row counts **before** and **after** cleaning. Verify that:
 
 ---
 
-### ✅ Solution: Compare Row Counts
+### Solution: Compare Row Counts
 
 ```python
 after_count = df_clean.count()
@@ -531,7 +495,7 @@ print("Rows removed by cleaning:", before_count - after_count)
 
 ---
 
-### 4) Sanity Check: Are There Any Remaining Nulls? (Run)
+### 4. Sanity Check: Are There Any Remaining Nulls? (Run)
 
 This helps confirm the dataset is in a usable state for downstream metrics.
 
