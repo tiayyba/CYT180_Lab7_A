@@ -269,18 +269,12 @@ df_covid.select("location", "date", "new_cases", "new_deaths") \
 Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
 
 **Hint:** You can either `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns only.
-
+The expected data type for  `location` should be a string type, `date` should be a date type (after casting), `new_cases` should be a numeric type (often `DoubleType`).
 ```python
 # TODO: Show the data types for 'location', 'date', and 'new_cases' from df_covid
 # Your code here
 
 ```
-
-**Expected Output:**
-- `location` should be a string type
-- `date` should be a date type (after casting)
-- `new_cases` should be a numeric type (often `DoubleType`)
-
 ### Task 3 — Show the Latest Records for Canada
 
 Display the **latest 10 records** for **Canada**, showing the columns:
@@ -294,13 +288,6 @@ Order by `date` **descending** so the most recent records appear first.
 ```python
 # TODO: Filter to Canada and show latest 10 records ordered by date descending
 # Your code here
-
-(df_covid
- .filter(F.col("location") == "Canada")
- .select("location", "date", "new_cases", "new_deaths")
- .orderBy(F.col("date").desc())
- .show(10, truncate=False))
-
 ```
 ### Screenshots to capture for Section 3
   - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
