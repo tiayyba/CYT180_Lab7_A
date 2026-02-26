@@ -12,8 +12,8 @@ In Lab 6, you installed Spark in Google Colab, created DataFrames, performed com
 
 In real Big Data engineering, a common pattern is to **merge multiple datasets**, clean and standardize them, compute meaningful metrics, and **write the results** to efficient formats. This lab introduces three essential skills:
 
-1. **Joining multiple DataFrames**
-2. **Cleaning and deduplicating** real-world data
+1. Joining multiple DataFrames using the **DataFrame API** and **Spark SQL**
+2. Cleaning: handling missing values and duplicate rows
 3. **Writing results** to disk using CSV and Parquet formats
 
 You will mostly **run provided code** to observe Spark’s behavior and complete a few **simple tasks** in each section.
@@ -27,7 +27,6 @@ By the end of this lab, you will be able to:
 - Perform inner, left, and anti joins in PySpark.
 - Detect and handle missing values using `dropna()`, `fillna()`, and conditional logic.
 - Remove duplicate rows using `dropDuplicates()`.
-- Use Spark SQL to perform multi-table joins.
 - Write DataFrames to disk using CSV and Parquet formats.
 - Compare file sizes and explain why Parquet is preferred in big‑data systems.
 - Explain how cleaning and joining datasets fit into a typical ETL (Extract‑Transform‑Load) workflow.
