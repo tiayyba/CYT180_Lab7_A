@@ -478,7 +478,7 @@ df_clean.select(
 - `remaining_null_new_cases` / `remaining_null_new_deaths` should be `0` if your fill worked.
 
 
-### 5) Guard the Per‑Capita Metric
+### 5. Guard the Per‑Capita Metric
 
 If you created `cases_per_million` in Section 4 **before** cleaning, recompute it now to ensure correctness after the cleaning steps.
 
@@ -581,7 +581,7 @@ Write a **single SQL query** over `covid_clean` that returns, for each `location
 
 ---
 
-### ✅ Solution — SQL Aggregation over `covid_clean`
+### Solution — SQL Aggregation over `covid_clean`
 
 ```python
 spark.sql("""
@@ -671,7 +671,7 @@ This mirrors a standard step in data engineering pipelines where results are wri
 
 ---
 
-### 1) Write Cleaned Data to CSV and Parquet (Run)
+### 1. Write Cleaned Data to CSV and Parquet
 
 We will write the `df_clean` DataFrame (created in Section 5) to two separate directories in Colab’s `/content` workspace.
 
@@ -689,7 +689,7 @@ df_clean.write.mode("overwrite").parquet("/content/lab7_output_parquet")
 
 ---
 
-### 2) Inspect Directory Structure (Run)
+### 2. Inspect Directory Structure
 
 The `ls -la` shell command helps you see what Spark wrote in each folder.
 
@@ -707,7 +707,7 @@ print("\nParquet directory listing:")
 
 ---
 
-### 3) Compare Sizes with `du -sh` (Run)
+### 3. Compare Sizes with `du -sh`
 
 We’ll compare the total sizes of the CSV and Parquet directories.  
 `du -sh` prints **human-readable** sizes (e.g., KB, MB).
@@ -726,7 +726,7 @@ print("\nParquet size:")
 
 ---
 
-### 📝 Student Task — Read Back the Parquet and Confirm Schema
+### Task — Read Back the Parquet and Confirm Schema
 
 **Problem Statement:**  
 Read the Parquet output back into a new DataFrame and print its **schema** and a small **preview**.  
@@ -740,7 +740,7 @@ This verifies that writing and reading Parquet preserves column types and data (
 
 ---
 
-### ✅ Solution — Read Back Parquet and Confirm Schema
+###  Solution — Read Back Parquet and Confirm Schema
 
 ```python
 # Read the Parquet output
@@ -757,7 +757,7 @@ df_parquet.orderBy("location", "date").show(10, truncate=False)
 
 ---
 
-### (Optional) Bonus — Partitioned Writes by Country
+### 4. Bonus — Partitioned Writes by Country
 
 Partitioning splits the dataset by one or more columns to improve prune-ability when reading subsets (e.g., only Canada).  
 This often improves performance during reads filtered on the partition key.
@@ -824,13 +824,13 @@ By the end of this lab, you should feel comfortable navigating Spark across its 
 ---
 
 
-## Section 8 — Submission Checklist, Ownership Proof, and Grading Notes
+## Section 8 — Submission Guidelines
 
 This final section defines **exactly what you must submit**, how to **prove ownership** of your work in Colab, and what **quality standards** will be used for grading. Follow it carefully to avoid deductions.
 
 ---
 
-### 1) Submission Artifacts (Screenshots + Short Answers)
+### 1. Submission Artifacts (Screenshots + Short Answers)
 
 Submit **clear, readable screenshots** for each required item listed below.  
 Under each screenshot, type your **short written answer(s)** to the relevant reflection prompt(s).
@@ -917,25 +917,10 @@ If you encounter technical issues in Colab (session disconnects, storage quota, 
 
 ---
 
-### 5) Grading Notes (3% total)
-
-This lab is graded on:
-- **Correctness** (joins, calculations, SQL, writing formats)
-- **Completeness** (all required screenshots + answers present)
-- **Clarity** (outputs readable, steps labeled, answers concise)
-- **Professionalism** (well-organized submission with ownership proof)
-
-Typical deductions:
-- **-0.5%**: Missing an essential screenshot (e.g., `cases_per_million` or SQL aggregation)
-- **-0.5%**: Screenshots too small/blurry to read
-- **-0.5%**: Missing ownership proof (timestamp + username)
-- **-0.5%**: Sloppy organization (out‑of‑order, unlabeled, or irrelevant outputs)
-
-> **Tip:** Do a quick self‑audit against the checklist before submitting.
 
 ---
 
-### 6) (Optional) Wrap‑Up: ETL Summary Talking Points
+### 6. Wrap‑Up: ETL Summary Talking Points
 
 Use these to frame your final reflection or discussion:
 
