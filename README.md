@@ -399,8 +399,8 @@ We will use this to compare row counts **before vs after** cleaning.
 
 ```python
 df_before_clean = df_joined
-before_count = df_before_clean.count()
-print("Rows BEFORE cleaning:", before_count)
+count_before_clean = df_joined.count()
+print("Rows BEFORE cleaning:", count_before_clean)
 ```
 
 
@@ -421,10 +421,10 @@ df_clean = df_clean.fillna({"new_cases": 0, "new_deaths": 0})
 df_clean = df_clean.dropDuplicates(["location", "date"])
 
 # Optional preview
-df_clean.select("location", "date", "new_cases", "new_deaths", "population").orderBy("location", "date").show(10, truncate=False)
+df_clean.orderBy("date").show(10, truncate=False)
 ```
 
-### Task 4 — Compare Row Counts (Before vs After)
+### Task 5 — Compare Row Counts (Before vs After)
 
 Print the row counts **before** and **after** cleaning. Verify that:
 - The **after** count is **less than or equal to** the **before** count
@@ -433,13 +433,8 @@ Print the row counts **before** and **after** cleaning. Verify that:
 ```python
 # TODO: Show counts before and after cleaning
 # Your code here
-after_count = df_clean.count()
-print("Rows BEFORE cleaning:", before_count)
-print("Rows AFTER  cleaning:", after_count)
 
 # Optional: show how many were dropped
-print("Rows removed by cleaning:", before_count - after_count)
-
 ```
 
 ### 4. Sanity Check: Are There Any Remaining Nulls? (Run)
@@ -469,17 +464,17 @@ df_clean = df_clean.withColumn(
     (F.col("new_cases") * F.lit(1_000_000)) / F.col("population")
 )
 
-df_clean.select("location", "date", "new_cases", "population", "cases_per_million") \
-        .orderBy("location", "date") \
-        .show(10, truncate=False)
+df_clean.select.orderBy("date").show(10, truncate=False)
 ```
-
 
 ### Reflection Questions (Write short answers beneath your screenshots)
 1. Why is **dropping duplicates** by (`location`, `date`) important in time‑series pipelines?  
 2. When is it **not** appropriate to fill missing values with zero? Give one example.  
 3. Why must rows with missing `population` be removed (or fixed) before computing per‑capita metrics?
 
+### Screenshots to capture for Section 5
+  - Row counts **before vs after** cleaning (and difference)
+  - Remaining nulls check after cleaning
 
 ---
 
