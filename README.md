@@ -141,11 +141,10 @@ This is extremely useful for:
 - detecting orphan records  
 - identifying missing relationships  
 
-Think of it as:  
-**"Show me the records that failed to match."**
+Think of it as:  **"Show me the records that failed to match."**
 
 
-### Student Task 1 — Anti Join
+### Task 1 — Anti Join
 Perform a right anti join on df_salary to find rows in the salary table that do not have a matching person in df_people.
 Expected output includes person_id = 5.
 
@@ -157,8 +156,7 @@ Add your code below and include a screenshot of the result.
 # Your code here
 ```
 ### Reflection Question 1
-In one sentence, explain why person_id = 5 appears in the anti join result.
-
+In 2-4 sentences, explain why person_id = 5 appears in the anti join result.
 
 ----
 
