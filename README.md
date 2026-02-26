@@ -482,6 +482,7 @@ df_clean.select.orderBy("date").show(10, truncate=False)
 
 In this section, you will practice joining and aggregating using **Spark SQL**.  
 You already completed joins with the **DataFrame API**; SQL gives you a declarative way to write the same logic, which many analysts and data engineers prefer for multi-table queries.
+
 In this section, we will:
 - Create temporary views for small demo tables (`people`, `salary`) and the cleaned COVID table.
 - Run a **LEFT JOIN** in SQL (people ↔ salary).
@@ -504,8 +505,7 @@ df_clean.createOrReplaceTempView("covid_clean")
 
 ### 2. Example: LEFT JOIN in SQL
 
-**Problem statement:**  
-List everyone from the `people` table, and include their `salary` if it exists.  
+**Problem statement:** List everyone from the `people` table, and include their `salary` if it exists.  
 If no salary record exists, the `salary` column should be `NULL`.
 
 ```python
@@ -519,21 +519,20 @@ SELECT
 FROM people p
 LEFT JOIN salary s
   ON p.person_id = s.person_id
-ORDER BY s.salary DESC NULLS LAST, p.person_id ASC
+ORDER BY s.salary DESC
 """).show()
 ```
 
-**What to look for:**
+**You should observe that:**
 - All rows from `people` appear.
 - If a person has no salary, the `salary` column is `NULL`.
 - The order puts the highest salaries first; `NULL` salaries are shown last.
 
 ---
 
-### Student Task — SQL Aggregation over `covid_clean`
+### 3. Example: SQL Aggregation over `covid_clean`
 
-**Problem statement:**  
-Write a **single SQL query** over `covid_clean` that returns, for each `location`:
+**Problem statement:** Write a **single SQL query** over `covid_clean` that returns, for each `location`:
 
 - `location`
 - `population`
@@ -545,18 +544,6 @@ Write a **single SQL query** over `covid_clean` that returns, for each `location
 - Group by `location`, `population`, `continent`
 - Order by `avg_new_cases` in **descending** order
 - Limit to the **top 10** rows for readability
-
-**Starter cell (you write the SQL):**
-```python
-# TODO: Write your SQL query here
-# spark.sql(""" 
-#   SELECT ...
-# """).show(truncate=False)
-```
-
----
-
-### Solution — SQL Aggregation over `covid_clean`
 
 ```python
 spark.sql("""
@@ -581,20 +568,16 @@ LIMIT 10
 
 ---
 
-### (Optional) Bonus: Join + Aggregate in one SQL query
+### 4. Join + Aggregate in one SQL query
 
-**Problem statement:**  
-From the **raw** COVID subset (pre-clean, if still available as `df_covid` → temp view `covid_raw`), join to `df_pop` (temp view `pop`) and compute average cases per million **in SQL**.  
-This mirrors the DataFrame logic you did earlier.
+**Problem statement:**  From the **raw** COVID subset (pre-clean, available as `df_covid` → temp view `covid_raw`), join to `df_pop` (temp view `pop`) and compute average cases per million **in SQL**.  This mirrors the DataFrame logic you did earlier.
 
-**Setup (if needed):**
 ```python
-# Create views if needed
 # df_covid.createOrReplaceTempView("covid_raw")
 # df_pop.createOrReplaceTempView("pop")
 ```
+After creating the views, we will write the SQL query to join and aggregate.
 
-**Example query (can vary):**
 ```python
 spark.sql("""
 SELECT
@@ -612,13 +595,10 @@ LIMIT 10
 """).show(truncate=False)
 ```
 
----
-
-### Reflection Questions (write answers beneath your screenshots)
+### Reflection Questions
 
 1. When might **SQL** be more readable or maintainable than the DataFrame API for joins and aggregations?  
 2. Why should you include **dimension columns** like `population` and `continent` in the `GROUP BY` along with `location`?  
-3. In the bonus query, why do we filter out rows where `population IS NULL`?
 
 ---
 
