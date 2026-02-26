@@ -175,7 +175,7 @@ Add your code below and include a screenshot of the result.
 ### Reflection Questions
 - In 2-4 sentences, explain why `person_id = 5` appears in the anti join result.
 
-### Screenshots to capture for this section
+### Screenshots to capture for Section 1
 - Inner join output
 - Left join output
 - **Task 1:** Right anti join code + output (must show `person_id = 5`)
@@ -222,7 +222,7 @@ This is important becasue:
 - Proper data types (e.g., `date`) are important for ordering, window functions, and time‑based joins/aggregations.
 - Filtering to a small, focused subset is a common step to accelerate iteration in development.
 
-### 1. Download & Load the CSV
+### Download & Load the CSV
 
 The cell below downloads the latest CSV into `/content` (Colab’s working directory) if it’s not already present, and loads it with `inferSchema=True` so Spark can detect numeric types.  
 We then cast the `date` string into a proper Spark `date` type so that time operations will work as expected.
@@ -250,7 +250,7 @@ print("Row count (may take a few seconds):", df.count())
 df.printSchema()
 ```
 
-### 2. Filter to a Focus Subset
+### Filter to a Focus Subset
 
 We will keep the same five countries used elsewhere in the lab to keep outputs readable and consistent.
 
@@ -320,6 +320,13 @@ Order by `date` **descending** so the most recent records appear first.
 - Only Canada rows  
 - Dates in descending order  
 - Exactly the four specified columns  
+
+### Screenshots to capture for Section 3
+  - `df.printSchema()` after `date` casting
+  - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
+  - Task 2: Types for `location`, `date`, `new_cases`
+  - Task 3: Latest 10 records for **Canada** (ordered by date descending)
+
 
 ----
 
