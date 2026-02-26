@@ -257,10 +257,10 @@ We will keep the same five countries used elsewhere in the lab to keep outputs r
 countries = ["Canada", "United States", "India", "Brazil", "Italy"]
 df_covid = df.filter(F.col("location").isin(countries)) # Uses `.isin(...)` to filter rows for our five countries.
 
-# Quick preview
+# Filtered preview
 # Orders by `location, date` to make the output human-friendly.
 df_covid.select("location", "date", "new_cases", "new_deaths") \
-        .orderBy("location", "date") \
+        .orderBy("date") \
         .show(10, truncate=False)
 ```
 
@@ -302,18 +302,10 @@ Order by `date` **descending** so the most recent records appear first.
  .show(10, truncate=False))
 
 ```
-
-**Expected Output**
-- Only Canada rows  
-- Dates in descending order  
-- Exactly the four specified columns  
-
 ### Screenshots to capture for Section 3
-  - `df.printSchema()` after `date` casting
   - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
   - Task 2: Types for `location`, `date`, `new_cases`
   - Task 3: Latest 10 records for **Canada** (ordered by date descending)
-
 
 ----
 
