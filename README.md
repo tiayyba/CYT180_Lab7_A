@@ -185,7 +185,6 @@ Add your code below and include a screenshot of the result.
 
 ## Section 2 — Load a Country Metadata Dataset
 
-
 Real-world data pipelines almost always combine:
 
 1. **Fact data** – large tables with daily records (e.g., COVID cases per day)  
@@ -268,20 +267,12 @@ df_covid.select("location", "date", "new_cases", "new_deaths") \
 ### Task 2 — Verify Data Types 
 
 Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
-
-**Hint:** You can call `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns.
+**Hint:** You can either `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns only.
 
 ```python
 # TODO: Show the data types for 'location', 'date', and 'new_cases' from df_covid
 # Your code here
-# Show the schema (full)
-df_covid.printSchema()
 
-# OR: Show just the dtypes list and filter what we need
-dtypes = dict(df_covid.dtypes)
-print("location:", dtypes.get("location"))
-print("date:", dtypes.get("date"))
-print("new_cases:", dtypes.get("new_cases"))
 ```
 
 **Expected Output:**
