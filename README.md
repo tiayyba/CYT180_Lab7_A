@@ -55,7 +55,7 @@ We will use two tables:
 
 Let's create these tables.
 
-### 1. Create Sample Data
+### Create Sample Data
 
 ```python
 from pyspark.sql import SparkSession
@@ -84,8 +84,7 @@ df_salary.show()
 ```
 
 
-### 2. What is an Inner Join?
-
+### Inner Join
 An **inner join** returns only the rows where the join key exists *in both* DataFrames.
 
 - If a `person_id` appears in both tables → it is included  
@@ -109,7 +108,7 @@ df_left = df_people.join(df_salary, df_people.person_id == df_salary.person_id, 
 In both cases, the **join key** is defined **with `on`** (either as a column name or a boolean expression). The `how` argument controls the join type: `"inner"` etc.
 
 
-###  What is a Left Join?
+###  Left Join
 
 A **left join** keeps *all* rows from the left DataFrame (`df_people`), and adds matching data from the right DataFrame (`df_salary`) when available.
 
@@ -126,7 +125,7 @@ df_left.show()
 ```
 
 
-###  What is an **Anti Join**?
+###  Anti Join
 
 An **anti join** returns rows from one DataFrame where **no match exists** in the other.
 
