@@ -45,18 +45,42 @@ By the end of this lab, you will be able to:
 
 ## Section 1 — Simple DataFrames & Basic Joins
 
-In this section, you will create two small DataFrames and learn how Spark performs different types of joins.  
+In this section, you will create two small DataFrames and learn how Spark performs different types of joins.
 Joins are one of the most important operations in data engineering because real-world datasets are almost never stored in a single table.
 
+### What is a Join?
+
+A **join** combines two DataFrames based on a shared column called the **join key**. Spark matches rows where the key has the same value in both tables.
+
+For example:
+
+- `df_people` has a `person_id` column  
+- `df_salary` also has a `person_id` column  
+
+If both tables contain a row with `person_id = 2`, Spark can **join** those rows so you get a single combined row containing all columns from both tables.
+
+Joins allow you to:
+
+- Detect missing or unmatched records  
+- Build analytics tables from multiple sources  
+
+In PySpark, the join condition is written using the `on` parameter:
+
+```python
+df_people.join(df_salary, on="person_id", how="left")
+```
+
+The `how` parameter controls the join type (e.g., `"inner"`, `"left"`, `"right"`, `"anti"`).
+
+Understanding this basic concept will help you interpret the different join types introduced shortly.
+
+### Create Sample Data
 We will use two tables:
 
 - `df_people` – information about individuals  
 - `df_salary` – salary records keyed by `person_id`
 
 Let's create these tables.
-
-### Create Sample Data
-
 ```python
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -154,8 +178,8 @@ Add your code below and include a screenshot of the result.
 # TODO: Right anti join on df_salary to find salaries with no matching people
 # Your code here
 ```
-### Reflection Question 1
-In 2-4 sentences, explain why person_id = 5 appears in the anti join result.
+### Reflection Questions
+- In 2-4 sentences, explain why person_id = 5 appears in the anti join result.
 
 ----
 
