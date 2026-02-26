@@ -407,7 +407,7 @@ df_joined.select(
 ).show()
 ```
 
-**What to look for:**
+**Notes:**
 - `population` should generally be present for the five countries we added; any nulls indicate a join mismatch.
 - `new_cases` / `new_deaths` may have nulls due to reporting gaps.
 
@@ -443,44 +443,23 @@ df_clean = df_clean.dropDuplicates(["location", "date"])
 df_clean.select("location", "date", "new_cases", "new_deaths", "population").orderBy("location", "date").show(10, truncate=False)
 ```
 
-**Notes:**
-- We intentionally **scope** `fillna` to specific columns to avoid masking other nulls (e.g., demographics).
-- `dropDuplicates` without a subset would de‑dup on the entire row; providing the subset focuses on the time‑series key.
-
-
 ### Task 4 — Compare Row Counts (Before vs After)
 
 Print the row counts **before** and **after** cleaning. Verify that:
 - The **after** count is **less than or equal to** the **before** count
 - Differences are explainable by dropped `population` nulls and duplicate rows
 
-**Requirements:**
-- Use `.count()` on both DataFrames
-- Print both numbers clearly
-
-**Starter:**
 ```python
 # TODO: Show counts before and after cleaning
 # Your code here
-```
-
-
-### Solution: Compare Row Counts
-
-```python
 after_count = df_clean.count()
 print("Rows BEFORE cleaning:", before_count)
 print("Rows AFTER  cleaning:", after_count)
 
 # Optional: show how many were dropped
 print("Rows removed by cleaning:", before_count - after_count)
+
 ```
-
-**Interpretation:**
-- If rows were removed, it’s due to:
-  - Null `population` (dropped in step 3.1), and/or
-  - Duplicate (`location`, `date`) rows (removed in step 3.3)
-
 
 ### 4. Sanity Check: Are There Any Remaining Nulls? (Run)
 
@@ -499,7 +478,7 @@ df_clean.select(
 - `remaining_null_new_cases` / `remaining_null_new_deaths` should be `0` if your fill worked.
 
 
-### 5) (Optional) Guard the Per‑Capita Metric (Run)
+### 5) Guard the Per‑Capita Metric
 
 If you created `cases_per_million` in Section 4 **before** cleaning, recompute it now to ensure correctness after the cleaning steps.
 
@@ -521,15 +500,6 @@ df_clean.select("location", "date", "new_cases", "population", "cases_per_millio
 3. Why must rows with missing `population` be removed (or fixed) before computing per‑capita metrics?
 
 
-### Screenshot Requirements for Section 5
-Include clear, readable screenshots of:
-1. The **missingness counts** before cleaning  
-2. The **row counts** before vs after cleaning (and the computed difference)  
-3. The **remaining nulls** check after cleaning  
-4. (Optional) A preview of the recomputed `cases_per_million` from the cleaned data
-
-Ensure outputs are not truncated; use `truncate=False` where helpful.
-
 ---
 
 ## Section 6 — Spark SQL Joins and Aggregations
@@ -543,9 +513,7 @@ You already completed joins with the **DataFrame API**; SQL gives you a declarat
 - Write an **aggregation** in SQL over the cleaned COVID data.
 - (Provided) Solution queries you can run directly.
 
----
-
-### 1) Create Temp Views (Run)
+### 1. Create Temp Views
 
 We expose existing DataFrames to Spark SQL by creating **temporary views**.  
 You can then query them with `spark.sql("...")`.
@@ -559,9 +527,7 @@ df_salary.createOrReplaceTempView("salary")
 df_clean.createOrReplaceTempView("covid_clean")
 ```
 
----
-
-### 2) Example: LEFT JOIN in SQL (Run)
+### 2. Example: LEFT JOIN in SQL
 
 **Problem statement:**  
 List everyone from the `people` table, and include their `salary` if it exists.  
@@ -589,7 +555,7 @@ ORDER BY s.salary DESC NULLS LAST, p.person_id ASC
 
 ---
 
-### 📝 Student Task — SQL Aggregation over `covid_clean`
+### Student Task — SQL Aggregation over `covid_clean`
 
 **Problem statement:**  
 Write a **single SQL query** over `covid_clean` that returns, for each `location`:
