@@ -328,8 +328,6 @@ df_joined.select("location", "date", "new_cases", "population", "continent") \
 - Maintains the same number of rows as the COVID subset  
 - Still sorted by `location, date` for readability
 
----
-
 ### Task 4 — Compute `cases_per_million`
 
 **Problem statement:**  
