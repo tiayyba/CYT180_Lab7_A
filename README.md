@@ -482,8 +482,7 @@ df_clean.select.orderBy("date").show(10, truncate=False)
 
 In this section, you will practice joining and aggregating using **Spark SQL**.  
 You already completed joins with the **DataFrame API**; SQL gives you a declarative way to write the same logic, which many analysts and data engineers prefer for multi-table queries.
-
-**What you will do:**
+In this section, we will:
 - Create temporary views for small demo tables (`people`, `salary`) and the cleaned COVID table.
 - Run a **LEFT JOIN** in SQL (people ↔ salary).
 - Write an **aggregation** in SQL over the cleaned COVID data.
