@@ -267,6 +267,7 @@ df_covid.select("location", "date", "new_cases", "new_deaths") \
 ### Task 2 — Verify Data Types 
 
 Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
+
 **Hint:** You can either `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns only.
 
 ```python
