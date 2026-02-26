@@ -55,7 +55,7 @@ We will use two tables:
 
 Let's create these tables.
 
-### 1. Create Sample Data (Run)
+### 1. Create Sample Data
 
 ```python
 from pyspark.sql import SparkSession
