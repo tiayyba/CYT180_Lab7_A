@@ -540,11 +540,6 @@ ORDER BY s.salary DESC
 - **average** daily `new_cases` as `avg_new_cases`
 - **maximum** daily `new_cases` as `max_new_cases`
 
-**Requirements:**
-- Group by `location`, `population`, `continent`
-- Order by `avg_new_cases` in **descending** order
-- Limit to the **top 10** rows for readability
-
 ```python
 spark.sql("""
 SELECT
