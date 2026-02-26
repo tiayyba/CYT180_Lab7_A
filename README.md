@@ -84,7 +84,7 @@ df_salary.show()
 ```
 
 
-### 2. What is an nner Join?
+### 2. What is an Inner Join?
 
 An **inner join** returns only the rows where the join key exists *in both* DataFrames.
 
