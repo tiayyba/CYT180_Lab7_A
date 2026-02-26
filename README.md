@@ -332,12 +332,11 @@ df_joined.orderBy("date").show(10, truncate=False)
 - Adds `population` and `continent` from `df_pop`  
 - If a country is missing in `df_pop`, Spark fills `population` and `continent` with `null`  
 - Maintains the same number of rows as the COVID subset  
-- Still sorted by `location, date` for readability
+- Still sorted by `date` for readability
 
 ### Task 4 — Compute `cases_per_million`
 
-**Problem statement:**  
-Create a new numeric column called `cases_per_million` using this formula:
+In the datafrmae `df_joined`, create a new numeric column called `cases_per_million` using this formula:
 
 ```
 cases_per_million = new_cases * 1,000,000 / population
@@ -346,40 +345,28 @@ cases_per_million = new_cases * 1,000,000 / population
 This metric allows you to compare countries fairly despite differences in population size.
 
 **Requirements:**
-- Use `withColumn`
-- Store result in a column named `cases_per_million`
-- Display at least the columns:
-  - `location`
-  - `date`
-  - `new_cases`
-  - `population`
-  - `cases_per_million`
+- Use `withColumn` to create `cases_per_million`.
+- Use the **population from the metadata table** (i.e., the joined population from `df_pop`, not the OWID one).
+- Store the result in a column named `cases_per_million`.
+- **After creating this column, preview the results**:
+  - Filter to `cases_per_million > 0` and `cases_per_million IS NOT NULL`. **Important:** If you simply sort by `date` and show the first 10 rows, you may see many zeros (early dates often have `new_cases = 0`). After creating this column, **preview the results** by filtering to show only rows where `cases_per_million` is **non‑null and greater than 0**.
+  - Display at least:
+    - `location`
+    - `date`
+    - `new_cases`
+    - `population`
+    - `cases_per_million`
+  - You may **either**:
+    - order by `date` (to see earliest non‑zero values), **or**
+    - order by `cases_per_million` descending (to see the largest values first).
 
 ```python
-# TODO: Add cases_per_million column
+# TODO: Add cases_per_million column and preview non-zero values
+# Hint: Use F.lit(1_000_000) and a filter like (F.col("cases_per_million") > 0)
+
 # Your code here
-
-from pyspark.sql import functions as F
-
-# Add cases_per_million column
-df_joined = df_joined.withColumn(
-    "cases_per_million",
-    (F.col("new_cases") * F.lit(1_000_000)) / F.col("population")
-)
-
-# Preview the result
-(df_joined
- .select("location", "date", "new_cases", "population", "cases_per_million")
- .orderBy("location", "date")
- .show(10, truncate=False))```
 ```
 
-**Explanation:**
-
-- We create a new column with `withColumn`.
-- The formula is: `cases_per_million = new_cases * 1,000,000 / population`.
-- Using `F.lit(1_000_000)` ensures Spark treats the constant as a numeric literal.
-- Null `population` values will produce null `cases_per_million` until cleaned in the next section.
 
 ### Reflection Question 2
 
