@@ -528,8 +528,6 @@ ORDER BY s.salary DESC
 - If a person has no salary, the `salary` column is `NULL`.
 - The order puts the highest salaries first; `NULL` salaries are shown last.
 
----
-
 ### 3. Example: SQL Aggregation over `covid_clean`
 
 **Problem statement:** Write a **single SQL query** over `covid_clean` that returns, for each `location`:
@@ -560,8 +558,6 @@ LIMIT 10
 - We include `population` and `continent` in the `GROUP BY` to keep the result uniquely defined and to prevent aggregate errors.
 - The `ORDER BY` shows countries with higher average new cases first.
 - `LIMIT 10` keeps the output concise for screenshots.
-
----
 
 ### 4. Join + Aggregate in one SQL query
 
@@ -595,17 +591,14 @@ LIMIT 10
 1. When might **SQL** be more readable or maintainable than the DataFrame API for joins and aggregations?  
 2. Why should you include **dimension columns** like `population` and `continent` in the `GROUP BY` along with `location`?  
 
----
-
 ### Screenshot Requirements for Section 6
 
 Include clear screenshots of:
 
 1. The **LEFT JOIN** SQL query and output (`people` ↔ `salary`).  
 2. Your **aggregation** SQL query over `covid_clean` and its output (with `avg_new_cases`, `max_new_cases`).  
-3. (Optional) The **bonus** SQL query and its output.  
-
-Ensure results are readable and not truncated (`show(truncate=False)` is helpful).
+3. **Join + Aggregate** in one SQL query
+4. Answers to the reflection questions 
 
 ----
 
