@@ -127,7 +127,7 @@ df_inner.show()
 
 You can also provide a boolean expression:  
 ```python
-df_left = df_people.join(df_salary, df_people.person_id == df_salary.person_id, "left")
+df_inner = df_people.join(df_salary, df_people.person_id == df_salary.person_id, "inner")
 ```
 In both cases, the **join key** is defined **with `on`** (either as a column name or a boolean expression). The `how` argument controls the join type: `"inner"` etc.
 
