@@ -197,11 +197,14 @@ df_pop.show()
 In this section, you will **download and load** the Our World in Data (OWID) COVID‑19 dataset into a Spark DataFrame and prepare it for joining by ensuring the `date` column has the proper Spark `date` type.  
 We will then **filter to five focus countries** so downstream tasks are fast and easy to inspect in Colab.
 
+**Why this matters:**
 - Large “fact” datasets like daily COVID records are common in analytics.
 - Proper data types (e.g., `date`) are important for ordering, window functions, and time‑based joins/aggregations.
 - Filtering to a small, focused subset is a common step to accelerate iteration in development.
 
-### 1. Download & Load the CSV
+---
+
+### 1) Download & Load the CSV
 
 The cell below downloads the latest CSV into `/content` (Colab’s working directory) if it’s not already present, and loads it with `inferSchema=True` so Spark can detect numeric types.  
 We then cast the `date` string into a proper Spark `date` type so that time operations will work as expected.
@@ -227,3 +230,809 @@ df = df.withColumn("date", F.to_date("date"))
 
 print("Row count (may take a few seconds):", df.count())
 df.printSchema()
+```
+
+**What to look for:**
+- `date` should appear as `DateType` in the schema after casting.
+- The row count confirms successful load (it can take a few seconds).
+
+### 2. Filter to a Focus Subset
+
+We will keep the same five countries used elsewhere in the lab to keep outputs readable and consistent.
+
+```python
+countries = ["Canada", "United States", "India", "Brazil", "Italy"]
+df_covid = df.filter(F.col("location").isin(countries))
+
+# Quick preview
+df_covid.select("location", "date", "new_cases", "new_deaths") \
+        .orderBy("location", "date") \
+        .show(10, truncate=False)
+```
+
+**What this does:**
+- Uses `.isin(...)` to filter rows for our five countries.
+- Selects a minimal set of columns to preview.
+- Orders by `location, date` to make the output human-friendly.
+
+
+### Student Task 2.A — Verify Data Types (Write + Run)
+
+**Problem statement:**  
+Print just the data types of the columns `location`, `date`, and `new_cases` from `df_covid` so you can confirm Spark’s understanding of your data.
+
+**Hint:** You can call `df_covid.dtypes` or `df_covid.printSchema()`, but your output should clearly indicate the types for those three columns.
+
+```python
+# TODO: Show the data types for 'location', 'date', and 'new_cases' from df_covid
+# Your code here
+# Show the schema (full)
+df_covid.printSchema()
+
+# OR: Show just the dtypes list and filter what we need
+dtypes = dict(df_covid.dtypes)
+print("location:", dtypes.get("location"))
+print("date:", dtypes.get("date"))
+print("new_cases:", dtypes.get("new_cases"))
+```
+
+**Expected discussion point:**
+- `location` should be a string type
+- `date` should be a date type (after casting)
+- `new_cases` should be a numeric type (often `DoubleType`)
+
+---
+
+### Student Task 2.B — Show the Latest Records for Canada (Write + Run)
+
+**Problem statement:**  
+Display the **latest 10 records** for **Canada**, showing the columns:
+- `location`
+- `date`
+- `new_cases`
+- `new_deaths`
+
+Order by `date` **descending** so the most recent records appear first.
+
+```python
+# TODO: Filter to Canada and show latest 10 records ordered by date descending
+# Your code here
+
+(df_covid
+ .filter(F.col("location") == "Canada")
+ .select("location", "date", "new_cases", "new_deaths")
+ .orderBy(F.col("date").desc())
+ .show(10, truncate=False))
+
+```
+
+**What to look for:**
+- Only Canada rows  
+- Dates in descending order  
+- Exactly the four specified columns  
+
+---
+
+### Screenshots to capture for this section
+
+1. The `df.printSchema()` output showing `date` is a `DateType`.  
+2. A preview of `df_covid` after filtering (the 10-row sample is fine).  
+3. Your Task 2.A code cell and its output (types).  
+4. Your Task 2.B code cell and its output (latest 10 records for Canada).  
+
+Make sure the text is readable and columns/rows are not truncated (use `truncate=False` where helpful).
+
+----
+
+## Section 4 — Join COVID Data with Population Data
+
+In this section, you will learn how to **join a large fact dataset** (daily COVID case counts) with a **small dimension table** (population + continent metadata).  
+This is one of the most common operations in data engineering and analytics.
+
+We will join the two DataFrames using the column `location`.  
+Both tables contain this field, so Spark can match rows correctly.
+
+The purpose of this join is to enrich the COVID dataset with population information so we can compute **per-capita metrics** such as `cases_per_million`.
+
+---
+
+### 1) Left Join on `location` (Run)
+
+We perform a **left join** because we want to keep all rows from the COVID dataset, even if a country is missing from the population table (rare, but safe).
+
+```python
+df_joined = df_covid.join(df_pop, on="location", how="left")
+
+df_joined.select("location", "date", "new_cases", "population", "continent") \
+         .orderBy("location", "date") \
+         .show(10, truncate=False)
+```
+
+**What this join does:**
+- Keeps every row from `df_covid`  
+- Adds `population` and `continent` from `df_pop`  
+- If a country is missing in `df_pop`, Spark fills `population` and `continent` with `null`  
+- Maintains the same number of rows as the COVID subset  
+- Still sorted by `location, date` for readability
+
+---
+
+### 2)  Student Task — Compute `cases_per_million`
+
+**Problem statement:**  
+Create a new numeric column called `cases_per_million` using this formula:
+
+```
+cases_per_million = new_cases * 1,000,000 / population
+```
+
+This metric allows you to compare countries fairly despite differences in population size.
+
+**Requirements:**
+- Use `withColumn`
+- Store result in a column named `cases_per_million`
+- Display at least the columns:
+  - `location`
+  - `date`
+  - `new_cases`
+  - `population`
+  - `cases_per_million`
+
+**Starter code:**
+
+```python
+# TODO: Add cases_per_million column
+# Your code here
+
+from pyspark.sql import functions as F
+
+# Add cases_per_million column
+df_joined = df_joined.withColumn(
+    "cases_per_million",
+    (F.col("new_cases") * F.lit(1_000_000)) / F.col("population")
+)
+
+# Preview the result
+(df_joined
+ .select("location", "date", "new_cases", "population", "cases_per_million")
+ .orderBy("location", "date")
+ .show(10, truncate=False))```
+```
+
+**Explanation:**
+
+- We create a new column with `withColumn`.
+- The formula is: `cases_per_million = new_cases * 1,000,000 / population`.
+- Using `F.lit(1_000_000)` ensures Spark treats the constant as a numeric literal.
+- Null `population` values will produce null `cases_per_million` until cleaned in the next section.
+
+---
+
+### Reflection Question 3
+
+Explain in 1–2 sentences why **per‑capita** metrics (per million people) are more meaningful than raw `new_cases` counts when comparing countries.
+
+---
+
+### Screenshot Requirements for Section 4
+
+Your screenshots must include:
+
+1. The joined DataFrame showing population and continent fields  
+2. Your working code for the `cases_per_million` column  
+3. A preview of the DataFrame showing this new column  
+
+Make sure all screenshots are readable and properly zoomed.
+
+----
+
+## Section 5 — Data Cleaning (Missing Values, Deduplication, Sanity Checks)
+
+In this section, you will **inspect**, **clean**, and **verify** the joined dataset from Section 4.  
+You will:
+- Identify missing values (e.g., `population`, `new_cases`)
+- Drop rows that cannot support per‑capita metrics (missing `population`)
+- Fill select numeric columns with sensible defaults for this lab (`new_cases`, `new_deaths` → `0`)
+- Remove **duplicate** rows using a composite key (`location`, `date`)
+- Verify the effect of cleaning by comparing **row counts** before and after
+
+ **Context:** In production, “filling with zero” is not universally correct. We do it here for instructional simplicity and to stabilize downstream calculations. Always choose imputation strategies that match your data semantics.
+
+---
+
+### 1) Inspect Missingness
+
+Use boolean expressions cast to integers to **count** nulls in key columns. This pattern is scalable and fast in Spark.
+
+```python
+from pyspark.sql import functions as F
+
+df_joined.select(
+    F.sum(F.col("population").isNull().cast("int")).alias("missing_population"),
+    F.sum(F.col("new_cases").isNull().cast("int")).alias("missing_new_cases"),
+    F.sum(F.col("new_deaths").isNull().cast("int")).alias("missing_new_deaths")
+).show()
+```
+
+**What to look for:**
+- `population` should generally be present for the five countries we added; any nulls indicate a join mismatch.
+- `new_cases` / `new_deaths` may have nulls due to reporting gaps.
+
+---
+
+### 2) Keep a Copy of the Pre‑Clean State
+
+We will use this to compare row counts **before vs after** cleaning.
+
+```python
+df_before_clean = df_joined
+before_count = df_before_clean.count()
+print("Rows BEFORE cleaning:", before_count)
+```
+
+---
+
+### 3) Perform Cleaning Steps (Run)
+
+- **Drop** rows missing `population` (we cannot compute per‑capita metrics without it).
+- **Fill** selected numeric columns (`new_cases`, `new_deaths`) with `0` for this exercise.
+- **Deduplicate** by the natural time‑series key: (`location`, `date`).
+
+```python
+# 3.1 Drop rows with missing population (per-capita metrics require a denominator)
+df_clean = df_joined.dropna(subset=["population"])
+
+# 3.2 Fill selected numeric nulls with zeros for stability in simple metrics
+df_clean = df_clean.fillna({"new_cases": 0, "new_deaths": 0})
+
+# 3.3 Remove duplicate records by (location, date)
+df_clean = df_clean.dropDuplicates(["location", "date"])
+
+# Optional preview
+df_clean.select("location", "date", "new_cases", "new_deaths", "population").orderBy("location", "date").show(10, truncate=False)
+```
+
+**Notes:**
+- We intentionally **scope** `fillna` to specific columns to avoid masking other nulls (e.g., demographics).
+- `dropDuplicates` without a subset would de‑dup on the entire row; providing the subset focuses on the time‑series key.
+
+---
+
+### 📝 Student Task — Compare Row Counts (Before vs After)
+
+**Problem statement:**  
+Print the row counts **before** and **after** cleaning. Verify that:
+- The **after** count is **less than or equal to** the **before** count
+- Differences are explainable by dropped `population` nulls and duplicate rows
+
+**Requirements:**
+- Use `.count()` on both DataFrames
+- Print both numbers clearly
+
+**Starter:**
+```python
+# TODO: Show counts before and after cleaning
+# Your code here
+```
+
+---
+
+### ✅ Solution: Compare Row Counts
+
+```python
+after_count = df_clean.count()
+print("Rows BEFORE cleaning:", before_count)
+print("Rows AFTER  cleaning:", after_count)
+
+# Optional: show how many were dropped
+print("Rows removed by cleaning:", before_count - after_count)
+```
+
+**Interpretation:**
+- If rows were removed, it’s due to:
+  - Null `population` (dropped in step 3.1), and/or
+  - Duplicate (`location`, `date`) rows (removed in step 3.3)
+
+---
+
+### 4) Sanity Check: Are There Any Remaining Nulls? (Run)
+
+This helps confirm the dataset is in a usable state for downstream metrics.
+
+```python
+df_clean.select(
+    F.sum(F.col("population").isNull().cast("int")).alias("remaining_null_population"),
+    F.sum(F.col("new_cases").isNull().cast("int")).alias("remaining_null_new_cases"),
+    F.sum(F.col("new_deaths").isNull().cast("int")).alias("remaining_null_new_deaths")
+).show()
+```
+
+**What you want to see:**
+- `remaining_null_population` should be `0` (we dropped them).
+- `remaining_null_new_cases` / `remaining_null_new_deaths` should be `0` if your fill worked.
+
+---
+
+### 5) (Optional) Guard the Per‑Capita Metric (Run)
+
+If you created `cases_per_million` in Section 4 **before** cleaning, recompute it now to ensure correctness after the cleaning steps.
+
+```python
+df_clean = df_clean.withColumn(
+    "cases_per_million",
+    (F.col("new_cases") * F.lit(1_000_000)) / F.col("population")
+)
+
+df_clean.select("location", "date", "new_cases", "population", "cases_per_million") \
+        .orderBy("location", "date") \
+        .show(10, truncate=False)
+```
+
+---
+
+### Reflection Questions (Write short answers beneath your screenshots)
+1. Why is **dropping duplicates** by (`location`, `date`) important in time‑series pipelines?  
+2. When is it **not** appropriate to fill missing values with zero? Give one example.  
+3. Why must rows with missing `population` be removed (or fixed) before computing per‑capita metrics?
+
+---
+
+### Screenshot Requirements for Section 5
+Include clear, readable screenshots of:
+1. The **missingness counts** before cleaning  
+2. The **row counts** before vs after cleaning (and the computed difference)  
+3. The **remaining nulls** check after cleaning  
+4. (Optional) A preview of the recomputed `cases_per_million` from the cleaned data
+
+Ensure outputs are not truncated; use `truncate=False` where helpful.
+
+---
+
+## Section 6 — Spark SQL Joins and Aggregations
+
+In this section, you will practice joining and aggregating using **Spark SQL**.  
+You already completed joins with the **DataFrame API**; SQL gives you a declarative way to write the same logic, which many analysts and data engineers prefer for multi-table queries.
+
+**What you will do:**
+- Create temporary views for small demo tables (`people`, `salary`) and the cleaned COVID table.
+- Run a **LEFT JOIN** in SQL (people ↔ salary).
+- Write an **aggregation** in SQL over the cleaned COVID data.
+- (Provided) Solution queries you can run directly.
+
+---
+
+### 1) Create Temp Views (Run)
+
+We expose existing DataFrames to Spark SQL by creating **temporary views**.  
+You can then query them with `spark.sql("...")`.
+
+```python
+# Make sure these DataFrames exist from prior sections:
+# df_people, df_salary, df_clean
+
+df_people.createOrReplaceTempView("people")
+df_salary.createOrReplaceTempView("salary")
+df_clean.createOrReplaceTempView("covid_clean")
+```
+
+---
+
+### 2) Example: LEFT JOIN in SQL (Run)
+
+**Problem statement:**  
+List everyone from the `people` table, and include their `salary` if it exists.  
+If no salary record exists, the `salary` column should be `NULL`.
+
+```python
+spark.sql("""
+SELECT
+  p.person_id,
+  p.first,
+  p.last,
+  p.country,
+  s.salary
+FROM people p
+LEFT JOIN salary s
+  ON p.person_id = s.person_id
+ORDER BY s.salary DESC NULLS LAST, p.person_id ASC
+""").show()
+```
+
+**What to look for:**
+- All rows from `people` appear.
+- If a person has no salary, the `salary` column is `NULL`.
+- The order puts the highest salaries first; `NULL` salaries are shown last.
+
+---
+
+### 📝 Student Task — SQL Aggregation over `covid_clean`
+
+**Problem statement:**  
+Write a **single SQL query** over `covid_clean` that returns, for each `location`:
+
+- `location`
+- `population`
+- `continent`
+- **average** daily `new_cases` as `avg_new_cases`
+- **maximum** daily `new_cases` as `max_new_cases`
+
+**Requirements:**
+- Group by `location`, `population`, `continent`
+- Order by `avg_new_cases` in **descending** order
+- Limit to the **top 10** rows for readability
+
+**Starter cell (you write the SQL):**
+```python
+# TODO: Write your SQL query here
+# spark.sql(""" 
+#   SELECT ...
+# """).show(truncate=False)
+```
+
+---
+
+### ✅ Solution — SQL Aggregation over `covid_clean`
+
+```python
+spark.sql("""
+SELECT
+  location,
+  population,
+  continent,
+  AVG(new_cases) AS avg_new_cases,
+  MAX(new_cases) AS max_new_cases
+FROM covid_clean
+GROUP BY location, population, continent
+ORDER BY avg_new_cases DESC
+LIMIT 10
+""").show(truncate=False)
+```
+
+**Explanation:**
+- `AVG(new_cases)` and `MAX(new_cases)` are computed per `location`.
+- We include `population` and `continent` in the `GROUP BY` to keep the result uniquely defined and to prevent aggregate errors.
+- The `ORDER BY` shows countries with higher average new cases first.
+- `LIMIT 10` keeps the output concise for screenshots.
+
+---
+
+### (Optional) Bonus: Join + Aggregate in one SQL query
+
+**Problem statement:**  
+From the **raw** COVID subset (pre-clean, if still available as `df_covid` → temp view `covid_raw`), join to `df_pop` (temp view `pop`) and compute average cases per million **in SQL**.  
+This mirrors the DataFrame logic you did earlier.
+
+**Setup (if needed):**
+```python
+# Create views if needed
+# df_covid.createOrReplaceTempView("covid_raw")
+# df_pop.createOrReplaceTempView("pop")
+```
+
+**Example query (can vary):**
+```python
+spark.sql("""
+SELECT
+  c.location,
+  p.continent,
+  p.population,
+  AVG(c.new_cases * 1000000.0 / p.population) AS avg_cases_per_million
+FROM covid_raw c
+LEFT JOIN pop p
+  ON c.location = p.location
+WHERE p.population IS NOT NULL
+GROUP BY c.location, p.continent, p.population
+ORDER BY avg_cases_per_million DESC
+LIMIT 10
+""").show(truncate=False)
+```
+
+---
+
+### Reflection Questions (write answers beneath your screenshots)
+
+1. When might **SQL** be more readable or maintainable than the DataFrame API for joins and aggregations?  
+2. Why should you include **dimension columns** like `population` and `continent` in the `GROUP BY` along with `location`?  
+3. In the bonus query, why do we filter out rows where `population IS NULL`?
+
+---
+
+### Screenshot Requirements for Section 6
+
+Include clear screenshots of:
+
+1. The **LEFT JOIN** SQL query and output (`people` ↔ `salary`).  
+2. Your **aggregation** SQL query over `covid_clean` and its output (with `avg_new_cases`, `max_new_cases`).  
+3. (Optional) The **bonus** SQL query and its output.  
+
+Ensure results are readable and not truncated (`show(truncate=False)` is helpful).
+
+----
+
+## Section 7 — Writing Data: CSV vs Parquet (and Comparing Sizes)
+
+In this section, you will **persist** your cleaned dataset to disk in two common formats and compare their storage sizes.  
+This mirrors a standard step in data engineering pipelines where results are written to **data lakes** or **lakehouses** for downstream use.
+
+**Why this matters:**
+- **CSV** is human-readable but large and schema-less.
+- **Parquet** is a **columnar**, **compressed**, and **schema-aware** format optimized for analytics and Spark.
+- Understanding when and why to prefer Parquet is table stakes for Big Data work.
+
+---
+
+### 1) Write Cleaned Data to CSV and Parquet (Run)
+
+We will write the `df_clean` DataFrame (created in Section 5) to two separate directories in Colab’s `/content` workspace.
+
+```python
+# Write CSV (directory with multiple part files)
+df_clean.write.mode("overwrite").csv("/content/lab7_output_csv")
+
+# Write Parquet (directory with multiple part files and metadata)
+df_clean.write.mode("overwrite").parquet("/content/lab7_output_parquet")
+```
+
+**Notes:**
+- Spark writes **directories**, not single files, because data may be partitioned across tasks.
+- `mode("overwrite")` ensures reruns replace older outputs.
+
+---
+
+### 2) Inspect Directory Structure (Run)
+
+The `ls -la` shell command helps you see what Spark wrote in each folder.
+
+```python
+print("CSV directory listing:")
+!ls -la /content/lab7_output_csv | head -n 20
+
+print("\nParquet directory listing:")
+!ls -la /content/lab7_output_parquet | head -n 20
+```
+
+**What to look for:**
+- CSV output folder will contain multiple `part-...` files (text files with CSV rows).
+- Parquet output folder will contain `part-...` **binary** files plus metadata.
+
+---
+
+### 3) Compare Sizes with `du -sh` (Run)
+
+We’ll compare the total sizes of the CSV and Parquet directories.  
+`du -sh` prints **human-readable** sizes (e.g., KB, MB).
+
+```python
+print("CSV size:")
+!du -sh /content/lab7_output_csv
+
+print("\nParquet size:")
+!du -sh /content/lab7_output_parquet
+```
+
+**What to expect:**
+- Parquet is typically **smaller** due to compression and columnar encoding.
+- Your exact numbers will vary by runtime and filtered subset.
+
+---
+
+### 📝 Student Task — Read Back the Parquet and Confirm Schema
+
+**Problem Statement:**  
+Read the Parquet output back into a new DataFrame and print its **schema** and a small **preview**.  
+This verifies that writing and reading Parquet preserves column types and data (including the `cases_per_million` if present in `df_clean`).
+
+**Starter:**
+```python
+# TODO: Read back Parquet, print schema, and show sample rows
+# Your code here
+```
+
+---
+
+### ✅ Solution — Read Back Parquet and Confirm Schema
+
+```python
+# Read the Parquet output
+df_parquet = spark.read.parquet("/content/lab7_output_parquet")
+
+# Show schema and a small preview
+df_parquet.printSchema()
+df_parquet.orderBy("location", "date").show(10, truncate=False)
+```
+
+**Explanation:**
+- Parquet stores the schema with the data; reading it back preserves types like `DateType`, numeric types, etc.
+- The `orderBy` is just for a tidy preview and does not affect stored data.
+
+---
+
+### (Optional) Bonus — Partitioned Writes by Country
+
+Partitioning splits the dataset by one or more columns to improve prune-ability when reading subsets (e.g., only Canada).  
+This often improves performance during reads filtered on the partition key.
+
+```python
+df_clean.write.mode("overwrite") \
+    .partitionBy("location") \
+    .parquet("/content/lab7_output_parquet_partitioned")
+
+print("Partitioned Parquet directory listing (top):")
+!ls -la /content/lab7_output_parquet_partitioned | head -n 30
+```
+
+**Try reading a single partition:**
+```python
+# Example: read only Canada's partition by using a path filter
+df_canada_only = spark.read.parquet("/content/lab7_output_parquet_partitioned/location=Canada")
+df_canada_only.show(10, truncate=False)
+```
+
+---
+
+### Reflection Questions (write your answers below your screenshots)
+
+1. Which output format had the **smaller** directory size, and **why**?  
+2. Name two reasons Parquet is preferred in analytic workloads compared to CSV.  
+3. What advantage does **partitioning** provide when querying a subset (e.g., a specific country)?  
+4. After reading the Parquet back, did the schema match your expectations (e.g., `date` type preserved)? Explain.
+
+---
+
+### Screenshot Requirements for Section 7
+
+Include clear screenshots of:
+
+1. The **write** operations to CSV and Parquet (the code cells).  
+2. The **directory listings** for both outputs.  
+3. The **`du -sh`** size comparison for CSV vs Parquet.  
+4. The **solution** that reads Parquet back and shows **schema + sample rows**.  
+5. (Optional) The **partitioned** write and directory preview.  
+
+Ensure outputs are readable and not truncated (`truncate=False` where helpful).
+
+---
+## Conclusion
+
+In this lab, you extended your Spark skills beyond basic DataFrame operations by working through a realistic mini–data‑engineering workflow. You learned how to enrich a large fact dataset (daily COVID‑19 records) with a smaller dimension table (country population metadata), clean and standardize the resulting data, compute meaningful per‑capita metrics, and write the final dataset in multiple formats. You also practiced joining data using both the DataFrame API and Spark SQL, reinforcing how Spark can operate in both programmatic and declarative styles.
+
+You now have hands‑on experience with:
+- Joining DataFrames using `on` keys
+- Handling missing values strategically
+- Removing duplicates in time‑series data
+- Creating per‑capita and derived metrics
+- Executing SQL joins and aggregations
+- Writing data to CSV and Parquet, and comparing storage behavior
+- Reading Parquet back into Spark and validating schema integrity
+
+These steps reflect the core of a modern **ETL pipeline**:
+1. **Extract** data from source systems  
+2. **Transform** it through cleaning, validation, and enrichment  
+3. **Load** it into optimized storage formats for downstream analytics  
+
+By the end of this lab, you should feel comfortable navigating Spark across its most commonly used components—DataFrames, SQL, joins, cleaning operations, and data serialization. These skills will support you in more advanced data engineering, big‑data analytics, and cloud‑based processing workflows in future labs and real‑world projects.
+---
+
+
+## Section 8 — Submission Checklist, Ownership Proof, and Grading Notes
+
+This final section defines **exactly what you must submit**, how to **prove ownership** of your work in Colab, and what **quality standards** will be used for grading. Follow it carefully to avoid deductions.
+
+---
+
+### 1) Submission Artifacts (Screenshots + Short Answers)
+
+Submit **clear, readable screenshots** for each required item listed below.  
+Under each screenshot, type your **short written answer(s)** to the relevant reflection prompt(s).
+
+**Required screenshots:**
+
+- **Section 1 (Joins)**
+  - Inner join output
+  - Left join output
+  - **Student Task 1:** Right anti join code + output (must show `person_id = 5`)
+
+- **Section 2 (Population Metadata)**
+  - `df_pop.show()` with all five countries and columns: `location`, `population`, `continent`
+
+- **Section 3 (COVID Load + Subset)**
+  - `df.printSchema()` after `date` casting
+  - Filtered preview (`df_covid` sample, e.g., `.show(10, truncate=False)`)
+  - **Task 2.A:** Types for `location`, `date`, `new_cases`
+  - **Task 2.B:** Latest 10 records for **Canada** (ordered by date descending)
+
+- **Section 4 (Join + Metric)**
+  - Joined table preview with `population` and `continent`
+  - **Student Task:** `cases_per_million` code + preview including `cases_per_million`
+
+- **Section 5 (Cleaning)**
+  - Missingness counts (before cleaning)
+  - Row counts **before vs after** cleaning (and difference)
+  - Remaining nulls check after cleaning
+  - (Optional) Recomputed `cases_per_million` preview from `df_clean`
+
+- **Section 6 (Spark SQL)**
+  - SQL LEFT JOIN (`people` ↔ `salary`) query + output
+  - **Student Task:** Aggregation query over `covid_clean` (with `avg_new_cases`, `max_new_cases`) + output
+  - (Optional) Bonus SQL join + per‑million metric
+
+- **Section 7 (Write + Compare Formats)**
+  - Code that writes **CSV** and **Parquet**
+  - Directory listings for both outputs
+  - `du -sh` size comparison for both
+  - **Student Task:** Read‑back Parquet code + schema + preview
+  - (Optional) Partitioned write preview and (optionally) a single partition read
+
+**Reflection Answers:**  
+Write **1–2 sentence** answers under the relevant screenshots for:
+- Section 1: Anti join reasoning  
+- Section 4: Why per‑capita metrics are more meaningful  
+- Section 5: Duplicates, zero‑fill caveats, and population null handling  
+- Section 6: When SQL is preferable; group‑by reasoning; null population filter  
+- Section 7: CSV vs Parquet; benefits of Parquet; partitioning advantage
+
+---
+
+### 2) Ownership Proof (Show Date/Time + Username in Colab)
+
+Add a small cell at the **top of your notebook** that prints your **username** and the **current timestamp** from the runtime.
+
+```python
+import getpass, datetime
+print("CYT180 Lab 7 Owner:", getpass.getuser())
+print("Timestamp:", datetime.datetime.now().isoformat())
+```
+
+Take a screenshot **showing this cell’s output** and include it with your submission.  
+If your environment returns a generic user (e.g., `root` in Colab), also type your full name/username in a Markdown cell and include that in the same screenshot.
+
+---
+
+### 3) Presentation & Professionalism Requirements
+
+- **Readability:** Use `.show(10, truncate=False)` for samples so columns are not cut off.
+- **Zoom:** Ensure text is **large enough** to read in the screenshot (no tiny text).
+- **Relevance:** Keep only relevant output; avoid long walls of text/logs.
+- **Organization:** Submit in the requested order. Clearly label each section in your document.
+- **Completeness:** Missing any required screenshot or answer may incur deduction up to 100%.
+
+---
+
+### 4) Late / Technical Issues
+
+If you encounter technical issues in Colab (session disconnects, storage quota, etc.):
+- Re-run the initialization cells (Spark setup from Lab 6) and retry the relevant sections.
+- If the dataset URL is temporarily unavailable, try again in a few minutes.
+- Document the issue briefly in your submission and include any partial results.
+
+---
+
+### 5) Grading Notes (3% total)
+
+This lab is graded on:
+- **Correctness** (joins, calculations, SQL, writing formats)
+- **Completeness** (all required screenshots + answers present)
+- **Clarity** (outputs readable, steps labeled, answers concise)
+- **Professionalism** (well-organized submission with ownership proof)
+
+Typical deductions:
+- **-0.5%**: Missing an essential screenshot (e.g., `cases_per_million` or SQL aggregation)
+- **-0.5%**: Screenshots too small/blurry to read
+- **-0.5%**: Missing ownership proof (timestamp + username)
+- **-0.5%**: Sloppy organization (out‑of‑order, unlabeled, or irrelevant outputs)
+
+> **Tip:** Do a quick self‑audit against the checklist before submitting.
+
+---
+
+### 6) (Optional) Wrap‑Up: ETL Summary Talking Points
+
+Use these to frame your final reflection or discussion:
+
+- **Extract:** Loaded OWID COVID CSV (fact) and created a small population table (dimension).
+- **Transform:** Joined on `location`, cleaned missing/duplicate values, computed `cases_per_million`, and aggregated in SQL.
+- **Load:** Wrote outputs in **CSV** and **Parquet**, validated Parquet read‑back, and compared storage sizes.
+
+This is the core of a **mini data engineering pipeline** in Spark, all runnable in Google Colab.
+
+---
