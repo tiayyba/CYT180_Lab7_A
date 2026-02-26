@@ -256,19 +256,14 @@ We will keep the same five countries used elsewhere in the lab to keep outputs r
 
 ```python
 countries = ["Canada", "United States", "India", "Brazil", "Italy"]
-df_covid = df.filter(F.col("location").isin(countries))
+df_covid = df.filter(F.col("location").isin(countries)) # Uses `.isin(...)` to filter rows for our five countries.
 
 # Quick preview
+# Orders by `location, date` to make the output human-friendly.
 df_covid.select("location", "date", "new_cases", "new_deaths") \
         .orderBy("location", "date") \
         .show(10, truncate=False)
 ```
-
-**Code Explanation:**
-- Uses `.isin(...)` to filter rows for our five countries.
-- Selects a minimal set of columns to preview.
-- Orders by `location, date` to make the output human-friendly.
-
 
 ### Task 2 — Verify Data Types 
 
