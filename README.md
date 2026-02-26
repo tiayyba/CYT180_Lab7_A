@@ -320,6 +320,7 @@ df_joined = df_joined.select(
     F.col("c.location").alias("location"),
     F.col("c.date").alias("date"),
     F.col("c.new_cases").alias("new_cases"),
+    F.col("c.new_deaths").alias("new_deaths"),
     F.col("p.population").alias("population"),    
     F.col("p.continent").alias("continent")
 )
