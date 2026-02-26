@@ -153,11 +153,7 @@ df_left.show()
 
 An **anti join** returns rows from one DataFrame where **no match exists** in the other.
 
-Specifically:
-
-- A **right anti join** shows rows in the right table (`df_salary`)  
-  that *do not* have a matching `person_id` in the left table (`df_people`)
-
+Specifically: a **right anti join** shows rows in the right table (`df_salary`)  that *do not* have a matching `person_id` in the left table (`df_people`)
 This is extremely useful for:
 
 - finding data quality issues  
